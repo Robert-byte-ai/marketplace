@@ -1,8 +1,7 @@
-<html>
-  <head>
-    <title>{{ flatpage.title }}</title>
-  </head>
-<body>
-  {{ flatpage.content }}
-</body>
-</html>
+{% extends 'main/base.html' %}
+{% block title %}
+    {{ flatpage.title }}
+{% endblock %}
+{% block content %}
+    {{ flatpage.content }}
+{% endblock %}
