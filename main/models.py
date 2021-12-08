@@ -26,7 +26,7 @@ class Seller(models.Model):
         verbose_name_plural = 'Продавцы'
 
     def __str__(self):
-        return self.user
+        return '{}'.format(self.user)
 
 
 class Category(models.Model):
