@@ -15,7 +15,7 @@ class Seller(models.Model):
 
     @property
     def count_ads(self):
-        count = Ad.objects.filter(seller=self.user).count()
+        count = Ad.objects.filter(seller__user=self.user).count()
         if count:
             return count
         return 0
@@ -26,7 +26,7 @@ class Seller(models.Model):
         verbose_name_plural = 'Продавцы'
 
     def __str__(self):
-        return self.user
+        return '{}'.format(self.user)
 
 
 class Category(models.Model):
@@ -47,7 +47,7 @@ class Category(models.Model):
         if new_slug is not None:
             slug = new_slug
         else:
-            slug = slugify(instance.title)
+            slug = slugify(instance.name)
 
         Category = instance.__class__
         qs_exists = Category.objects.filter(slug=slug).exists()
@@ -58,6 +58,11 @@ class Category(models.Model):
             )
             return self.unique_slug_generator(instance, new_slug=new_slug)
         return slug
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = self.unique_slug_generator(self)
+        super(Category, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ('-pk',)
