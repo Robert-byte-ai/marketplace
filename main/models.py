@@ -7,6 +7,19 @@ from .utils import random_string_generator
 User = get_user_model()
 
 
+class BaseModel(models.Model):
+    name = models.CharField(
+        max_length=200,
+        db_index=True
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        abstract = True
+
+
 class Seller(models.Model):
     user = models.OneToOneField(
         User,
@@ -29,12 +42,7 @@ class Seller(models.Model):
         return '{}'.format(self.user)
 
 
-class Category(models.Model):
-    name = models.CharField(
-        max_length=200,
-        verbose_name='Имя категории'
-    )
-
+class Category(BaseModel):
     slug = models.SlugField(
         max_length=50,
         unique=True,
@@ -69,11 +77,8 @@ class Category(models.Model):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
-    def __str__(self):
-        return self.name
 
-
-class Tag(models.Model):
+class Tag(BaseModel):
     name = models.CharField(
         verbose_name='Название',
         max_length=200,
@@ -85,17 +90,8 @@ class Tag(models.Model):
         verbose_name = 'тег'
         verbose_name_plural = 'теги'
 
-    def __str__(self):
-        return self.name
 
-
-class Ad(models.Model):
-    name = models.CharField(
-        verbose_name='Название',
-        max_length=200,
-        db_index=True,
-    )
-
+class Ad(BaseModel):
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -133,10 +129,26 @@ class Ad(models.Model):
         verbose_name='Цена',
     )
 
+    is_archive = models.BooleanField(
+        default=False,
+    )
+
     class Meta:
         ordering = ('-pk',)
         verbose_name = 'Объявление'
         verbose_name_plural = 'Объявления'
 
-    def __str__(self):
-        return self.name
+
+class ManagerArchive(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_archive=True)
+
+
+class ArchiveAds(Ad):
+    objects = ManagerArchive()
+
+    class Meta:
+        proxy = True
+        verbose_name = 'Архивное объявление'
+        verbose_name_plural = 'Архивные объявления'
