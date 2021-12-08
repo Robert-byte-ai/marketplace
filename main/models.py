@@ -128,6 +128,11 @@ class Ad(models.Model):
         verbose_name='Теги',
     )
 
+    price = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Цена',
+    )
+
     class Meta:
         ordering = ('-pk',)
         verbose_name = 'Объявление'
