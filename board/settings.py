@@ -11,6 +11,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -21,6 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.flatpages',
     'ckeditor',
+    'constance',
+    'constance.backends.database',
     'main',
 ]
 
@@ -98,3 +104,9 @@ CKEDITOR_UPLOAD_PATH = "uploads/"
 STATIC_URL = '/static/'
 
 CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor/'
+
+CONSTANCE_CONFIG = {
+    'MAINTENANCE_MODE': (
+        False, 'На сайте проводятся технические работы'
+    ),
+}

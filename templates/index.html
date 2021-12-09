@@ -1,10 +1,16 @@
 {% extends 'main/base.html' %}
 {% block content %}
-{% load flatpages %}
-{% get_flatpages as flatpages %}
-    <ul>
-        {% for page in flatpages %}
-            <li><a href="{{ page.url }}">{{ page.title }}</a></li>
-        {% endfor %}
-    </ul>
+    {% if 'turn_on_block' is True %}
+        <div>
+        На сайте проводятся технические работы
+        </div>
+    {% else %}
+        {% load flatpages %}
+        {% get_flatpages as flatpages %}
+            <ul>
+                {% for page in flatpages %}
+                    <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+                {% endfor %}
+             </ul>
+    {% endif %}
 {% endblock %}
