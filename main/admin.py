@@ -19,7 +19,7 @@ class FlatPageAdmin(admin.ModelAdmin):
 
 
 class SellerAdmin(admin.ModelAdmin):
-    list_display = ("pk", "user",)
+    list_display = ("pk", "user", 'count_ads')
 
 
 class CategoryAdmin(admin.ModelAdmin):
