@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.flatpages',
+    'ckeditor',
     'main',
 ]
 
@@ -90,4 +91,10 @@ USE_TZ = True
 
 SITE_ID = 1
 
+CKEDITOR_FILENAME_GENERATOR = 'utils.get_filename'
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
+
 STATIC_URL = '/static/'
+
+CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor/'
