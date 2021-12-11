@@ -1,0 +1,14 @@
+{% extends "main/base.html" %}
+
+{% block content %}
+    <h2>Ads</h2>
+    <ul>
+    {% if ads_list %}
+        {% for ad in ads_list %}
+            <li><a href="{% url 'ad' ad.pk %}">{{ ad.name }}</a></li>
+        {% endfor %}
+    {% else %}
+        There are no ads
+    {% endif %}
+    </ul>
+{% endblock %}

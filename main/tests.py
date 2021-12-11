@@ -25,7 +25,7 @@ Seller.objects.all()
 categoryies = ['Садоводство', 'Музыка', 'Одежда', 'Книги']
 
 for category in categoryies:
-    Category.objets.create(name=category)
+    Category.objects.create(name=category)
 
 Category.objects.all()
 # <QuerySet [<Category: Садоводство>, <Category: Музыка>, <Category: Одежда>, <Category: Книги>]>

@@ -38,6 +38,7 @@ class AdAdmin(admin.ModelAdmin):
         'pub_date',
         'edited_date',
         'price',
+        'pk',
     )
 
 
