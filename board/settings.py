@@ -110,3 +110,5 @@ CONSTANCE_CONFIG = {
         False, 'На сайте проводятся технические работы'
     ),
 }
+
+ADS_PER_PAGE = 10

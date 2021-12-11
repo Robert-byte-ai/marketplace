@@ -1,14 +1,35 @@
 {% extends "main/base.html" %}
 
 {% block content %}
-    <h2>Ads</h2>
-    <ul>
-    {% if ads_list %}
+    <table>
+        <style>
+            table {
+            border: 3px solid grey;
+            width: 1480px;
+            }
+            th, td {
+            border: 1px solid grey;
+            }
+        </style>
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Title</th>
+            </tr>
+        </thead>
         {% for ad in ads_list %}
-            <li><a href="{% url 'ad' ad.pk %}">{{ ad.name }}</a></li>
+            <tr>
+                <th scope="row">{{ ad.id }}</th>
+                <td><a href="{{ ad.id }}">{{ ad.name}}</a></td>
+            </tr>
         {% endfor %}
-    {% else %}
-        There are no ads
-    {% endif %}
-    </ul>
+    </table>
+    <table>
+        <tr>
+            {% for tag in tags %}
+                <td><a href="?tag={{ tag.name }}">{{ tag.name }}</a></td>
+            {% endfor %}
+        </tr>
+    </table>
+    {% include 'main/includes/paginator.html' %}
 {% endblock %}

@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from constance import config
 import random
 
-from .models import Ad
+from .models import Ad, Tag
+from board.settings import ADS_PER_PAGE
 
 
 def index(request):
@@ -17,9 +18,14 @@ def index(request):
 
 
 class AdList(generic.ListView):
-    model = Ad
+    queryset = Ad.objects.all().order_by('pk')
+    paginate_by = ADS_PER_PAGE
     template_name = 'ad_list.html'
     context_object_name = 'ads_list'
+    extra_context = {'tags': Tag.objects.all()}
+
+    def get_queryset(self):
+        return Ad.objects.filter(tags__name=self.request.GET.get('tag'))
 
 
 class AdDetail(generic.DetailView):
