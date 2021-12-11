@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    {% block  header %}
-        {% include 'main/includes/header.html' %}
-    {% endblock %}
-    {% block content %}
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        {% block  header %}
+            {% include 'main/includes/header.html' %}
+        {% endblock %}
+        {% block content %}
 
-    {% endblock %}
-    {% block  footer %}
-        {% include 'main/includes/footer.html' %}
-    {% endblock %}
-</body>
+        {% endblock %}
+        {% block  footer %}
+            {% include 'main/includes/footer.html' %}
+        {% endblock %}
+    </body>
 </html>
-
