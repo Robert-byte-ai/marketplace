@@ -66,3 +66,21 @@ class SellerUpdate(mixins.LoginRequiredMixin,
         if user_form.is_valid():
             user_form.save()
         return super().form_valid(form)
+
+
+class AdAdd(mixins.LoginRequiredMixin,
+            generic.CreateView):
+    model = Ad
+    fields = '__all__'
+    template_name = 'ad_add.html'
+    success_url = reverse_lazy("ads")
+    login_url = 'ads'
+
+
+class AdEdit(mixins.LoginRequiredMixin,
+             generic.UpdateView):
+    model = Ad
+    fields = '__all__'
+    template_name = 'ad_add.html'
+    success_url = reverse_lazy("ads")
+    login_url = 'ads'
