@@ -23,7 +23,14 @@ class BaseModel(models.Model):
 class Seller(models.Model):
     user = models.OneToOneField(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+    )
+
+    ITN = models.CharField(
+        max_length=200,
+        db_index=True,
+        default=11111,
+        verbose_name='ИНН'
     )
 
     @property

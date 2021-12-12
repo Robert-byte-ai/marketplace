@@ -1,0 +1,8 @@
+{% extends 'main/base.html' %}
+{% block content %}
+<form action="{% url 'seller_update' %}" method="POST">{% csrf_token %}
+    {{ form.as_p }}
+    {{ user_form.as_p }}
+    <input type="submit" value="Update">
+</form>
+{% endblock content %}
