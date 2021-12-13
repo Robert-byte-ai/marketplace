@@ -1,8 +1,12 @@
 {% load filters %}
+{% load sorl_thumbnail %}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <button class="btn btn-outline-success" type="button">Notifications:{{notifications}}</button>
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">{{username}}</a>
+    <a class="navbar-brand" href="#">{{request.user.username}}</a>
+      {% thumbnail user.seller.avatar "30x30" crop="center" as im %}
+        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+      {% endthumbnail %}
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>

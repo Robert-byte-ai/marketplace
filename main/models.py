@@ -33,6 +33,11 @@ class Seller(models.Model):
         verbose_name='ИНН'
     )
 
+    avatar = models.ImageField(
+        upload_to='images/avatars',
+        default='images/avatars/default.jpg'
+    )
+
     @property
     def count_ads(self):
         count = Ad.objects.filter(seller__user=self.user).count()
@@ -159,3 +164,17 @@ class ArchiveAds(Ad):
         proxy = True
         verbose_name = 'Архивное объявление'
         verbose_name_plural = 'Архивные объявления'
+
+
+class Picture(models.Model):
+    ad = models.ForeignKey(
+        Ad,
+        on_delete=models.CASCADE,
+        related_name='ads',
+        verbose_name='Объявление'
+    )
+
+    image = models.ImageField(
+        upload_to='images/ads',
+        default='images/ads/default.jpg'
+    )

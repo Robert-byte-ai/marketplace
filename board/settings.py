@@ -1,4 +1,5 @@
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -27,6 +28,7 @@ INSTALLED_APPS = [
     'ckeditor',
     'constance',
     'constance.backends.database',
+    'sorl.thumbnail',
     'main',
 ]
 
@@ -112,3 +114,7 @@ CONSTANCE_CONFIG = {
 }
 
 ADS_PER_PAGE = 10
+
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

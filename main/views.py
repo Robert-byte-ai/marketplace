@@ -13,7 +13,6 @@ from .forms import UserForm
 def index(request):
     context = {
         "turn_on_block": config.MAINTENANCE_MODE,
-        "username": request.user.username,
         'notifications': random.randint(0, 100),
         'hello': 'Привет, мир!'
     }
@@ -25,7 +24,11 @@ class AdList(generic.ListView):
     paginate_by = ADS_PER_PAGE
     template_name = 'ad_list.html'
     context_object_name = 'ads_list'
-    extra_context = {'tags': Tag.objects.all()}
+    extra_context = {
+        'tags': Tag.objects.all(),
+        'notifications': random.randint(0, 100),
+        'hello': 'Привет, мир!'
+    }
 
     def get_queryset(self):
         return Ad.objects.filter(
