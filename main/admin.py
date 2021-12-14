@@ -3,7 +3,7 @@ from django.contrib import admin
 from ckeditor.widgets import CKEditorWidget
 from django.contrib.flatpages.models import FlatPage
 
-from .models import Seller, Category, Tag, Ad, ArchiveAds
+from .models import Seller, Category, Tag, Ad, ArchiveAds, Picture
 
 
 class FlatPageAdminForm(forms.ModelForm):
@@ -19,7 +19,7 @@ class FlatPageAdmin(admin.ModelAdmin):
 
 
 class SellerAdmin(admin.ModelAdmin):
-    list_display = ("pk", "user", 'count_ads','ITN',)
+    list_display = ("pk", "user", 'count_ads', 'ITN',)
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -42,6 +42,10 @@ class AdAdmin(admin.ModelAdmin):
     )
 
 
+class PictureAdmin(admin.ModelAdmin):
+    list_display = ["ad"]
+
+
 admin.site.unregister(FlatPage)
 admin.site.register(FlatPage, FlatPageAdmin)
 admin.site.register(Seller, SellerAdmin)
@@ -49,3 +53,4 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Ad, AdAdmin)
 admin.site.register(ArchiveAds)
+admin.site.register(Picture, PictureAdmin)

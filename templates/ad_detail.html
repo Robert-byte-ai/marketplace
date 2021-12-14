@@ -3,4 +3,8 @@
 {% block content %}
 <h1>{{ ad.name }}</h1>
 <p>Price: {{ ad.price }}</p>
+    {% load thumbnail %}
+    {% for picture in ad.pictures.all %}
+        <img src="{{ picture.image.url }}">
+    {% endfor %}
 {% endblock %}

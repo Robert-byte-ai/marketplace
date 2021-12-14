@@ -1,3 +1,4 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import generic
@@ -7,7 +8,7 @@ import random
 
 from .models import Ad, Tag, Seller
 from board.settings import ADS_PER_PAGE
-from .forms import UserForm
+from .forms import UserForm, ImageFormset
 
 
 def index(request):
@@ -33,7 +34,7 @@ class AdList(generic.ListView):
     def get_queryset(self):
         return Ad.objects.filter(
             tags__name=self.request.GET.get('tag')
-        )
+        ).order_by('pk')
 
 
 class AdDetail(generic.DetailView):
@@ -79,6 +80,24 @@ class AdAdd(mixins.LoginRequiredMixin,
     success_url = reverse_lazy("ads")
     login_url = 'ads'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['image_form'] = ImageFormset(
+            self.request.POST or None,
+            files=self.request.FILES or None,
+            instance=self.object or None
+        )
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            self.object = form.save()
+            formset = self.get_context_data()['image_form']
+            if formset.is_valid():
+                formset.save()
+            return HttpResponseRedirect(self.success_url)
+
 
 class AdEdit(mixins.LoginRequiredMixin,
              generic.UpdateView):
@@ -87,3 +106,21 @@ class AdEdit(mixins.LoginRequiredMixin,
     template_name = 'ad_add.html'
     success_url = reverse_lazy("ads")
     login_url = 'ads'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['image_form'] = ImageFormset(
+            self.request.POST or None,
+            files=self.request.FILES or None,
+            instance=self.object
+        )
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            self.object = self.get_object()
+            formset = self.get_context_data()['image_form']
+            if formset.is_valid():
+                formset.save()
+            return HttpResponseRedirect(self.success_url)

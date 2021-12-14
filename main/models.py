@@ -29,6 +29,7 @@ class Seller(models.Model):
     ITN = models.CharField(
         max_length=200,
         db_index=True,
+        unique=True,
         default=11111,
         verbose_name='ИНН'
     )
@@ -170,11 +171,17 @@ class Picture(models.Model):
     ad = models.ForeignKey(
         Ad,
         on_delete=models.CASCADE,
-        related_name='ads',
+        related_name='pictures',
         verbose_name='Объявление'
     )
 
     image = models.ImageField(
         upload_to='images/ads',
-        default='images/ads/default.jpg'
+        default='images/ads/default.jpg',
+        verbose_name='Картинка'
     )
+
+    class Meta:
+        ordering = ('-pk',)
+        verbose_name = 'Изображение'
+        verbose_name_plural = 'Изображения'

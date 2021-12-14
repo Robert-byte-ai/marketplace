@@ -1,13 +1,15 @@
 {% extends 'main/base.html' %}
 {% block content %}
 {% if ad %}
-    <form action="{% url 'ad_edit' ad.pk %}"  method="POST">{% csrf_token %}
+    <form action="{% url 'ad_edit' ad.pk %}" enctype="multipart/form-data"  method="POST">{% csrf_token %}
         {{ form.as_p }}
+        {{ image_form.as_p }}
         <input type="submit" value="Update">
     </form>
 {% else %}
-    <form action="{% url 'ad_add' %}"  method="POST">{% csrf_token %}
+    <form action="{% url 'ad_add' %}" enctype="multipart/form-data"  method="POST">{% csrf_token %}
     {{ form.as_p }}
+    {{ image_form.as_p }}
     <input type="submit" value="Save">
     </form>
 {% endif %}
