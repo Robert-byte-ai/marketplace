@@ -36,7 +36,7 @@ class Seller(models.Model):
 
     avatar = models.ImageField(
         upload_to='images/avatars',
-        default='images/avatars/default.jpg'
+        default=f'images/avatars/{user}default.jpg'
     )
 
     @property
