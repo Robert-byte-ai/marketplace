@@ -48,7 +48,7 @@ class SellerUpdate(mixins.LoginRequiredMixin,
     model = Seller
     fields = ('ITN',)
     template_name = 'seller_update.html'
-    login_url = 'ads'
+    login_url = '/accounts/login/'
     success_url = reverse_lazy("seller_update")
 
     def get_object(self, queryset=None):
@@ -78,7 +78,7 @@ class AdAdd(mixins.LoginRequiredMixin,
     fields = '__all__'
     template_name = 'ad_add.html'
     success_url = reverse_lazy("ads")
-    login_url = 'ads'
+    login_url = '/accounts/login/'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -105,7 +105,7 @@ class AdEdit(mixins.LoginRequiredMixin,
     fields = '__all__'
     template_name = 'ad_add.html'
     success_url = reverse_lazy("ads")
-    login_url = 'ads'
+    login_url = '/accounts/login/'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
