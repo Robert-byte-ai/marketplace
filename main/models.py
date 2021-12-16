@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 
-from .utils import random_string_generator
+from .utils import random_string_generator, check_inn
 
 User = get_user_model()
 
@@ -31,7 +31,8 @@ class Seller(models.Model):
         db_index=True,
         unique=True,
         default=11111,
-        verbose_name='ИНН'
+        verbose_name='ИНН',
+        validators=[check_inn],
     )
 
     avatar = models.ImageField(
