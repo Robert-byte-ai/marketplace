@@ -10,7 +10,7 @@ from .utils import random_string_generator, check_inn
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        instance.groups.add(Group.objects.get(name='group_name'))
+        instance.groups.add(Group.objects.get(name='common_users'))
 
 
 class BaseModel(models.Model):
@@ -38,7 +38,7 @@ class Seller(models.Model):
         unique=True,
         default=11111,
         verbose_name='ИНН',
-        validators=[check_inn]
+        validators=[check_inn],
     )
 
     avatar = models.ImageField(

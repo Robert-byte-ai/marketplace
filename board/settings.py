@@ -28,8 +28,13 @@ INSTALLED_APPS = [
     'ckeditor',
     'constance',
     'constance.backends.database',
-    'sorl.thumbnail',
     'main',
+    'oauth_app',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'sorl.thumbnail',
 ]
 
 MIDDLEWARE = [
@@ -118,3 +123,24 @@ ADS_PER_PAGE = 10
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend'
+]
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+
+LOGIN_REDIRECT_URL = '/accounts/seller'
+LOGOUT_REDIRECT_URL = '/'
