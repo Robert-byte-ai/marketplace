@@ -3,6 +3,7 @@ from django.contrib.auth.models import User, Group
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.mail import send_mail
 
 from .utils import random_string_generator, check_inn
 
@@ -192,3 +193,29 @@ class Picture(models.Model):
         ordering = ('-pk',)
         verbose_name = 'Изображение'
         verbose_name_plural = 'Изображения'
+
+
+class Subscription(models.Model):
+    user = models.ManyToManyField(
+        User,
+        related_name='subscriptions',
+    )
+
+    class Meta:
+        ordering = ('-pk',)
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+
+
+@receiver(post_save, sender=Ad)
+def new_ads(instance, created, **kwargs):
+    if created:
+        send_mail(
+            'Notification',
+            f'New ad: {instance}',
+            'company@gmail.com',
+            [
+                user.email for user in User.objects.all()
+                if Subscription.objects.filter(user=user).exists()
+            ]
+        )
