@@ -72,8 +72,10 @@ class SellerUpdate(mixins.LoginRequiredMixin,
         return super().form_valid(form)
 
 
-class AdAdd(mixins.LoginRequiredMixin,
-            generic.CreateView):
+class AdAdd(mixins.PermissionRequiredMixin,
+            mixins.LoginRequiredMixin,
+            generic.CreateView,):
+    permission_required = 'main.add_ad'
     model = Ad
     fields = '__all__'
     template_name = 'ad_add.html'
