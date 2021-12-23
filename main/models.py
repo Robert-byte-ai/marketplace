@@ -3,9 +3,6 @@ from django.contrib.auth.models import User, Group
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.mail import send_mail
-from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime, timedelta, date
 
 from .utils import random_string_generator, check_inn
 
@@ -207,23 +204,3 @@ class Subscription(models.Model):
         ordering = ('-pk',)
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-
-
-def new_ads():
-    if Ad.objects.latest('pub_date').pub_date.date() > (
-            datetime.today().date() - timedelta(days=7)
-    ):
-        send_mail(
-            'Notification',
-            f'New ads',
-            'company@gmail.com',
-            [
-                user.email for user in User.objects.all()
-                if Subscription.objects.filter(user=user).exists()
-            ]
-        )
-
-
-scheduler = BackgroundScheduler(timezone='Europe/Moscow')
-scheduler.add_job(func=new_ads, trigger='interval', weeks=1)
-scheduler.start()
