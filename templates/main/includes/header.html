@@ -9,6 +9,7 @@
       {% thumbnail user.seller.avatar "30x30" crop="center" as im %}
         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
       {% endthumbnail %}
+      <a href="{% url 'logout' %}">Logout</a>
   {% else %}
     <a href="{% provider_login_url 'google' %}">Login With Google</a>
   {% endif %}
@@ -28,10 +29,16 @@
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Dropdown
+            Menu
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="#">Action</a></li>
+            {% if user.is_authenticated and request.path == '/ads/' %}
+                {% for group in request.user.groups.all %}
+                    {% if group.name != "banned_users" %}
+                      <li><a class="dropdown-item" href="{% url 'ad_add' %}">Add ad</a></li>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
             <li><a class="dropdown-item" href="#">Another action</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="#">Something else here</a></li>
