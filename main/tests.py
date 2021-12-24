@@ -84,3 +84,12 @@ Ad.objects.filter(category__name='Одежда')
 
 Ad.objects.filter(category__name='Книги')
 # <QuerySet [<Ad: some else 2>, <Ad: Что-нибудь 2>, <Ad: something>]>
+
+from main.tasks import supper_sum, hello
+
+task_sum = supper_sum.delay(5, 8)
+print(task_sum.result)
+# 13
+task_hello = hello.delay()
+print(task_hello.result)
+# Hello, world
