@@ -5,8 +5,6 @@ from datetime import datetime, timedelta
 
 from main.models import Ad, Subscription, User
 
-scheduler = BackgroundScheduler(timezone='Europe/Moscow')
-
 
 def ads():
     if Ad.objects.latest('pub_date').pub_date.date() > (
@@ -26,5 +24,6 @@ def ads():
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
+        scheduler = BackgroundScheduler(timezone='Europe/Moscow')
         scheduler.add_job(func=ads, trigger='interval', weeks=1)
         scheduler.start()
