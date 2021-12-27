@@ -15,9 +15,9 @@ app.conf.beat_schedule = {
         'task': 'main.tasks.ads_message',
         'schedule': crontab(
             day_of_week='monday',
-            our=17
+            hour=17
         )
-    },
+    }
 }
 
 app.conf.timezone = 'UTC'
