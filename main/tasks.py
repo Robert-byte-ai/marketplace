@@ -28,7 +28,7 @@ def ads_message():
         user.email for user in User.objects.all()
         if Subscription.objects.filter(user=user).exists()
     ]
-    ads = [getattr(ad, 'name') for ad in ads_for_week]
+    ads = [ad.name for ad in ads_for_week]
     if len(ads_for_week) > 0:
         return send_message(f'New ads: {" ".join(ads)}', emails)
     return send_message('There are no ads', emails)
