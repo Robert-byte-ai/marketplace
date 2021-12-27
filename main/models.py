@@ -5,7 +5,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from .utils import random_string_generator, check_inn
-from .tasks import ads_message
 
 
 @receiver(post_save, sender=User)
