@@ -46,6 +46,15 @@ class Seller(models.Model):
         default=f'images/avatars/{user}default.jpg'
     )
 
+    phone = models.CharField(
+        max_length=18,
+        db_index=True,
+        unique=True,
+        null=True,
+        blank=True,
+        verbose_name='Номер телефона'
+    )
+
     @property
     def count_ads(self):
         count = Ad.objects.filter(seller__user=self.user).count()
@@ -204,3 +213,27 @@ class Subscription(models.Model):
         ordering = ('-pk',)
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+
+
+class SMSLog(models.Model):
+    seller = models.OneToOneField(
+        Seller,
+        on_delete=models.CASCADE,
+        verbose_name='Продавец'
+    )
+
+    code = models.CharField(
+        max_length=4,
+        db_index=True,
+        unique=True,
+        verbose_name='Код'
+    )
+
+    confirmed = models.BooleanField(
+        default=False,
+        verbose_name='Подтвержден номер или нет,'
+    )
+
+    response = models.TextField(
+        verbose_name='Ответ от провайдера'
+    )

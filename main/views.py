@@ -1,14 +1,15 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-from django.views import generic
+from django.views import generic, View
 from constance import config
 from django.contrib.auth import mixins
 import random
 
-from .models import Ad, Tag, Seller
+from .models import Ad, Tag, Seller, SMSLog
 from board.settings import ADS_PER_PAGE
-from .forms import UserForm, ImageFormset
+from .forms import UserForm, ImageFormset, CodeForm
+from .tasks import send_confirmation_code
 
 
 def index(request):
@@ -51,10 +52,11 @@ class AdDetail(generic.DetailView):
 class SellerUpdate(mixins.LoginRequiredMixin,
                    generic.UpdateView):
     model = Seller
-    fields = ('ITN',)
+    fields = ('ITN', 'phone')
     template_name = 'seller_update.html'
     login_url = '/accounts/login/'
     success_url = reverse_lazy("seller_update")
+    message_url = '/accounts/seller/message'
 
     def get_object(self, queryset=None):
         return get_object_or_404(
@@ -66,15 +68,47 @@ class SellerUpdate(mixins.LoginRequiredMixin,
         context = super().get_context_data(**kwargs)
         context['user_form'] = UserForm(
             self.request.POST or None,
-            instance=self.request.user
+            instance=self.object.user
         )
         return context
 
-    def form_valid(self, form):
+    def post(self, request, *args, **kwargs):
+        phone = self.request.POST.get('phone')
+        self.object = self.get_object()
+        form = self.get_form()
         user_form = self.get_context_data()['user_form']
+        if self.object.phone != phone and form.is_valid():
+            form.save()
+            send_confirmation_code.delay(
+                phone, self.request.user.username
+            )
+            return HttpResponseRedirect(self.message_url)
         if user_form.is_valid():
             user_form.save()
-        return super().form_valid(form)
+            return HttpResponseRedirect(self.success_url)
+
+
+class VerifyCode(mixins.PermissionRequiredMixin,
+                 mixins.LoginRequiredMixin,
+                 generic.TemplateView):
+    success_url = reverse_lazy('seller_update')
+    template_name = 'verify_phone.html'
+    permission_required = 'main.seller_message'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['code_form'] = CodeForm(
+            self.request.POST or None,
+        )
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if get_object_or_404(
+                SMSLog,
+                seller__user=self.request.user
+        ).code == request.POST.get('code'):
+            return HttpResponseRedirect(self.success_url)
+        return HttpResponseBadRequest('Wrong confirmation code')
 
 
 class AdAdd(mixins.PermissionRequiredMixin,
@@ -124,9 +158,10 @@ class AdEdit(mixins.LoginRequiredMixin,
         return context
 
     def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
         form = self.get_form()
         if form.is_valid():
-            self.object = self.get_object()
+            form.save()
             formset = self.get_context_data()['image_form']
             if formset.is_valid():
                 formset.save()
