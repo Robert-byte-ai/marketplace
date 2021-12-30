@@ -72,28 +72,31 @@ class SellerUpdate(mixins.LoginRequiredMixin,
         )
         return context
 
+    def save_forms(self, user_form, form):
+        if user_form.is_valid() and form.is_valid():
+            user_form.save()
+            form.save()
+
     def post(self, request, *args, **kwargs):
         phone = self.request.POST.get('phone')
         self.object = self.get_object()
         form = self.get_form()
         user_form = self.get_context_data()['user_form']
-        if self.object.phone != phone and form.is_valid():
-            form.save()
+        if self.object.phone == phone:
+            self.save_forms(user_form, form)
+            return HttpResponseRedirect(self.success_url)
+        elif self.object.phone != phone:
+            self.save_forms(user_form, form)
             send_confirmation_code.delay(
                 phone, self.request.user.username
             )
             return HttpResponseRedirect(self.message_url)
-        if user_form.is_valid():
-            user_form.save()
-            return HttpResponseRedirect(self.success_url)
 
 
-class VerifyCode(mixins.PermissionRequiredMixin,
-                 mixins.LoginRequiredMixin,
+class VerifyCode(mixins.LoginRequiredMixin,
                  generic.TemplateView):
     success_url = reverse_lazy('seller_update')
     template_name = 'verify_phone.html'
-    permission_required = 'main.seller_message'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
