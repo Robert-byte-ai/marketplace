@@ -74,8 +74,7 @@ class SellerUpdate(mixins.LoginRequiredMixin,
 
     def save_forms(self, user_form, form):
         if user_form.is_valid() and form.is_valid():
-            user_form.save()
-            form.save()
+            return user_form.save(), form.save()
 
     def post(self, request, *args, **kwargs):
         phone = self.request.POST.get('phone')
@@ -86,10 +85,10 @@ class SellerUpdate(mixins.LoginRequiredMixin,
             self.save_forms(user_form, form)
             return HttpResponseRedirect(self.success_url)
         elif self.object.phone != phone:
-            self.save_forms(user_form, form)
             send_confirmation_code.delay(
                 phone, self.request.user.username
             )
+            self.save_forms(user_form, form)
             return HttpResponseRedirect(self.message_url)
 
 
