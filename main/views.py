@@ -1,5 +1,5 @@
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import generic, View
 from constance import config
@@ -93,12 +93,10 @@ class SellerUpdate(mixins.LoginRequiredMixin,
             return HttpResponseRedirect(self.message_url)
 
 
-class VerifyCode(mixins.PermissionRequiredMixin,
-                 mixins.LoginRequiredMixin,
+class VerifyCode(mixins.LoginRequiredMixin,
                  generic.TemplateView):
     success_url = reverse_lazy('seller_update')
     template_name = 'verify_phone.html'
-    permission_required = 'main.seller_message'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
