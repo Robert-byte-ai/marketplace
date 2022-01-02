@@ -1,9 +1,11 @@
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-from django.views import generic, View
+from django.views import generic
 from constance import config
 from django.contrib.auth import mixins
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 import random
 
 from .models import Ad, Tag, Seller, SMSLog
@@ -21,6 +23,7 @@ def index(request):
     return render(request, 'index.html', context)
 
 
+@method_decorator(cache_page(60 * 5), name='dispatch')
 class AdList(generic.ListView):
     queryset = Ad.objects.all().order_by('pk')
     paginate_by = ADS_PER_PAGE
