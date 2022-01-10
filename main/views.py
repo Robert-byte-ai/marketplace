@@ -4,6 +4,7 @@ from django.urls import reverse_lazy
 from django.views import generic
 from constance import config
 from django.contrib.auth import mixins
+from django.core.cache import cache
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 import random
@@ -25,7 +26,7 @@ def index(request):
 
 @method_decorator(cache_page(60 * 5), name='dispatch')
 class AdList(generic.ListView):
-    queryset = Ad.objects.all().order_by('pk')
+    queryset = Ad.objects.all()
     paginate_by = ADS_PER_PAGE
     template_name = 'ad_list.html'
     context_object_name = 'ads_list'
@@ -40,16 +41,27 @@ class AdList(generic.ListView):
         if tag:
             queryset = Ad.objects.filter(
                 tags__name=tag
-            ).order_by('pk')
+            )
         else:
             queryset = super().get_queryset()
-        return queryset
+        return queryset.order_by('pk')
 
 
 class AdDetail(generic.DetailView):
     model = Ad
     template_name = 'ad_detail.html'
     context_object_name = 'ad'
+
+    def get_context_data(self, **kwargs):
+        if cache.get('new_price') is None:
+            cache.set(
+                'new_price',
+                self.object.price * random.uniform(0.8, 1.2),
+                60
+            )
+        context = super().get_context_data(**kwargs)
+        context['new_price'] = cache.get('new_price')
+        return context
 
 
 class SellerUpdate(mixins.LoginRequiredMixin,
