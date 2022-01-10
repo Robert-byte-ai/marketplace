@@ -94,7 +94,7 @@ def test_url_status(setUp):
         [PHONE_CONFIRM_URL, setUp['authorized_client'], 200],
         [AD_ADD_URL, setUp['authorized_client'], 200],
         [setUp['AD_EDIT_URL'], setUp['authorized_client'], 200],
-        [setUp['AD_EDIT_URL'], setUp['authorized_client'], 200],
+        [setUp['AD_URL'], setUp['guest_client'], 200],
     ]
     for url, client, status in test_urls:
         assert client.get(url).status_code == status
