@@ -12,7 +12,7 @@ def ads():
     ):
         send_mail(
             'Notification',
-            f'New ads',
+            'New ads',
             'company@gmail.com',
             [
                 user.email for user in User.objects.all()

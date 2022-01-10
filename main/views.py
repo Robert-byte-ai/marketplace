@@ -9,7 +9,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 import random
 
-from .models import Ad, Tag, Seller, SMSLog, Group
+from .models import Ad, Tag, Seller, SMSLog
 from board.settings import ADS_PER_PAGE
 from .forms import UserForm, ImageFormset, CodeForm
 from .tasks import send_confirmation_code
@@ -146,7 +146,10 @@ class AdAdd(mixins.LoginRequiredMixin,
         return context
 
     def post(self, request, *args, **kwargs):
-        if 'banned_users' in [group.name for group in request.user.groups.all()]:
+        if 'banned_users' in [
+            group.name for group
+            in request.user.groups.all()
+        ]:
             return HttpResponseBadRequest('You are banned')
         form = self.get_form()
         if form.is_valid():
