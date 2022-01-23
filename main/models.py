@@ -14,9 +14,13 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 
 class BaseModel(models.Model):
+    """
+    Базовая абстрактная модель, в которой определенно общее поле name
+    """
     name = models.CharField(
         max_length=200,
-        db_index=True
+        db_index=True,
+        verbose_name='Название'
     )
 
     def __str__(self):
@@ -27,6 +31,15 @@ class BaseModel(models.Model):
 
 
 class Seller(models.Model):
+    """
+        Модель продавца, имеет поля:
+        user(связь с юзером один к одному),
+        ITN(ИНН продавца, строковое поле с ограничением по размеру),
+        avatar(аватар продавца, файловое поле, проверяющее, что загруженный
+        объект является допустимым изображением),
+        phone(телефон продавца, строковое поле с ограничением по размеру),
+        count_ads(функция, подсчитывающая количество объявлений продавца)
+    """
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -74,6 +87,10 @@ class Seller(models.Model):
 
 
 class Category(BaseModel):
+    """
+        Модель категории, наследуюется от базовой модели, имеет поля:
+        slug(самозаполняемый слаг категории),
+    """
     slug = models.SlugField(
         max_length=50,
         unique=True,
@@ -110,12 +127,9 @@ class Category(BaseModel):
 
 
 class Tag(BaseModel):
-    name = models.CharField(
-        verbose_name='Название',
-        max_length=200,
-        db_index=True,
-    )
-
+    """
+        Модель тега, наследуюется от базовой модели
+    """
     class Meta:
         ordering = ('-pk',)
         verbose_name = 'тег'
@@ -123,6 +137,17 @@ class Tag(BaseModel):
 
 
 class Ad(BaseModel):
+    """
+        Модель объявления, наследуется от базовой содели, имеет поля:
+        category(связь с моделью Category один ко многим),
+        seller(связь с моделью Seller один ко многим),
+        pub_date(Дата публикации объявления, дата и время,
+        представленные в Python экземпляром datetime.datetime),
+        edited_date(дата редактирования объявления, см. pub_date),
+        tags(связь с моделью Tag многие ко многим),
+        price(цена объявления, целое положительное число),
+        is_archive(являеется ли объявление архивированным, буллево значение)
+    """
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -171,12 +196,17 @@ class Ad(BaseModel):
 
 
 class ManagerArchive(models.Manager):
-
+    """
+    Определение архивных моделей
+    """
     def get_queryset(self):
         return super().get_queryset().filter(is_archive=True)
 
 
 class ArchiveAds(Ad):
+    """
+    Модель архивного объявления
+    """
     objects = ManagerArchive()
 
     class Meta:
@@ -186,6 +216,12 @@ class ArchiveAds(Ad):
 
 
 class Picture(models.Model):
+    """
+        Модель изображения, имеет поля:
+        ad(объявление, связь с моделью Ad один к многим),
+        image(изображение объявления, файловое поле, проверяющее, что загруженный
+        объект является допустимым изображением),
+    """
     ad = models.ForeignKey(
         Ad,
         on_delete=models.CASCADE,
@@ -206,6 +242,10 @@ class Picture(models.Model):
 
 
 class Subscription(models.Model):
+    """
+        Модель подписки, имеет поля:
+        user(связь с юзером один к одному),
+    """
     user = models.ManyToManyField(
         User,
         related_name='subscriptions',
@@ -218,6 +258,14 @@ class Subscription(models.Model):
 
 
 class SMSLog(models.Model):
+    """
+        Модель СМС отправленного на телефон
+        продавца для потверждения телефона, имеет поля:
+        seller(продавец номер которого изменен, связь с моделю Seller один к одному),
+        code(код потверждения, отправленный на номер продавца, ограниченное строковое поле),
+        confirmed(подтвержден ли номер, буллево значение),
+        response(ответ от провайдера, строковое поле)
+    """
     seller = models.OneToOneField(
         Seller,
         on_delete=models.CASCADE,
