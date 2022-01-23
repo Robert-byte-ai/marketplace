@@ -66,7 +66,7 @@ def send_confirmation_code(phone, seller_username):
             user__username=seller_username
         ),
         code=message.body[-4:],
-        confirmed=True,
+        confirmed=False,
         response=message.status
     )
     return message.body[-4:]

@@ -227,7 +227,6 @@ class SMSLog(models.Model):
     code = models.CharField(
         max_length=4,
         db_index=True,
-        unique=True,
         verbose_name='Код'
     )
 

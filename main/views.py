@@ -1,12 +1,9 @@
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-from django.views import generic
+from django.views import generic, View
 from constance import config
 from django.contrib.auth import mixins
-from django.core.cache import cache
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 import random
 
 from .models import Ad, Tag, Seller, SMSLog
@@ -24,9 +21,8 @@ def index(request):
     return render(request, 'index.html', context)
 
 
-@method_decorator(cache_page(60 * 5), name='dispatch')
 class AdList(generic.ListView):
-    queryset = Ad.objects.all()
+    queryset = Ad.objects.all().order_by('pk')
     paginate_by = ADS_PER_PAGE
     template_name = 'ad_list.html'
     context_object_name = 'ads_list'
@@ -41,27 +37,16 @@ class AdList(generic.ListView):
         if tag:
             queryset = Ad.objects.filter(
                 tags__name=tag
-            )
+            ).order_by('pk')
         else:
             queryset = super().get_queryset()
-        return queryset.order_by('pk')
+        return queryset
 
 
 class AdDetail(generic.DetailView):
     model = Ad
     template_name = 'ad_detail.html'
     context_object_name = 'ad'
-
-    def get_context_data(self, **kwargs):
-        if cache.get('new_price') is None:
-            cache.set(
-                'new_price',
-                self.object.price * random.uniform(0.8, 1.2),
-                60
-            )
-        context = super().get_context_data(**kwargs)
-        context['new_price'] = cache.get('new_price')
-        return context
 
 
 class SellerUpdate(mixins.LoginRequiredMixin,
@@ -87,30 +72,28 @@ class SellerUpdate(mixins.LoginRequiredMixin,
         )
         return context
 
-    def save_forms(self, user_form, form):
-        if user_form.is_valid() and form.is_valid():
-            return user_form.save(), form.save()
-
     def post(self, request, *args, **kwargs):
         phone = self.request.POST.get('phone')
         self.object = self.get_object()
         form = self.get_form()
         user_form = self.get_context_data()['user_form']
-        if self.object.phone == phone:
-            self.save_forms(user_form, form)
-            return HttpResponseRedirect(self.success_url)
-        elif self.object.phone != phone:
+        if self.object.phone != phone and form.is_valid():
+            form.save()
             send_confirmation_code.delay(
                 phone, self.request.user.username
             )
-            self.save_forms(user_form, form)
             return HttpResponseRedirect(self.message_url)
+        if user_form.is_valid():
+            user_form.save()
+            return HttpResponseRedirect(self.success_url)
 
 
-class VerifyCode(mixins.LoginRequiredMixin,
+class VerifyCode(mixins.PermissionRequiredMixin,
+                 mixins.LoginRequiredMixin,
                  generic.TemplateView):
     success_url = reverse_lazy('seller_update')
     template_name = 'verify_phone.html'
+    permission_required = 'main.seller_message'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -128,8 +111,10 @@ class VerifyCode(mixins.LoginRequiredMixin,
         return HttpResponseBadRequest('Wrong confirmation code')
 
 
-class AdAdd(mixins.LoginRequiredMixin,
+class AdAdd(mixins.PermissionRequiredMixin,
+            mixins.LoginRequiredMixin,
             generic.CreateView, ):
+    permission_required = 'main.add_ad'
     model = Ad
     fields = '__all__'
     template_name = 'ad_add.html'
@@ -146,11 +131,6 @@ class AdAdd(mixins.LoginRequiredMixin,
         return context
 
     def post(self, request, *args, **kwargs):
-        if 'banned_users' in [
-            group.name for group
-            in request.user.groups.all()
-        ]:
-            return HttpResponseBadRequest('You are banned')
         form = self.get_form()
         if form.is_valid():
             self.object = form.save()
