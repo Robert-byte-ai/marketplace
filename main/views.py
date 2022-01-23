@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
@@ -6,9 +7,9 @@ from constance import config
 from django.contrib.auth import mixins
 import random
 
-from .models import Ad, Tag, Seller, SMSLog
+from .models import Ad, Tag, Seller, SMSLog, User
 from board.settings import ADS_PER_PAGE
-from .forms import UserForm, ImageFormset, CodeForm
+from .forms import UserForm, ImageFormset, CodeForm, SellerForm
 from .tasks import send_confirmation_code
 
 
