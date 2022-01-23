@@ -113,10 +113,10 @@ class SellerUpdateView(mixins.LoginRequiredMixin,
             return HttpResponseRedirect(self.get_success_url())
         else:
             self.render_to_response(self.get_context_data(
-                form=form,
-                user_form=user_form,
-                **forms_context,
-            )
+                    form=form,
+                    user_form=user_form,
+                    **forms_context,
+                )
             )
 
 
