@@ -49,66 +49,74 @@ class AdDetail(generic.DetailView):
     context_object_name = 'ad'
 
 
-class SellerUpdate(mixins.LoginRequiredMixin,
-                   generic.UpdateView):
-    model = Seller
-    fields = ('ITN', 'phone')
+class SellerUpdateView(mixins.LoginRequiredMixin,
+                       generic.UpdateView):
     template_name = 'seller_update.html'
-    login_url = '/accounts/login/'
+    model = Seller
+    form_class = SellerForm
     success_url = reverse_lazy("seller_update")
-    message_url = '/accounts/seller/message'
 
     def get_object(self, queryset=None):
-        return get_object_or_404(
-            Seller,
-            user=self.request.user
-        )
+        seller, created = Seller.objects.get_or_create(user=self.request.user)
+        return seller
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user_form'] = UserForm(
-            self.request.POST or None,
-            instance=self.object.user
-        )
+        user = self.request.user
+        if 'user_form' not in context:
+            context['user_form'] = UserForm(instance=user)
+        if 'confirmation_form' not in context:
+            sms = SMSLog.objects.filter(seller=self.object)
+            if sms and not sms.get().confirmed:
+                context['confirmation_form'] = CodeForm()
         return context
 
-    def post(self, request, *args, **kwargs):
-        phone = self.request.POST.get('phone')
-        self.object = self.get_object()
-        form = self.get_form()
-        user_form = self.get_context_data()['user_form']
-        if self.object.phone != phone and form.is_valid():
-            form.save()
+    def form_valid(self, form):
+        self.object = form.save()
+        if 'phone' in form.changed_data:
             send_confirmation_code.delay(
-                phone, self.request.user.username
+                self.request.POST.get('phone'),
+                self.object.user.username
             )
-            return HttpResponseRedirect(self.message_url)
+        all_forms_are_valid = True
+        forms_context = {'form': form}
+        user = User.objects.get(seller=self.object)
+        user_form = UserForm(self.request.POST, instance=user)
+        forms_context['user_form'] = user_form
         if user_form.is_valid():
             user_form.save()
-            return HttpResponseRedirect(self.success_url)
-
-
-class VerifyCode(mixins.PermissionRequiredMixin,
-                 mixins.LoginRequiredMixin,
-                 generic.TemplateView):
-    success_url = reverse_lazy('seller_update')
-    template_name = 'verify_phone.html'
-    permission_required = 'main.seller_message'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['code_form'] = CodeForm(
-            self.request.POST or None,
-        )
-        return context
-
-    def post(self, request, *args, **kwargs):
-        if get_object_or_404(
-                SMSLog,
-                seller__user=self.request.user
-        ).code == request.POST.get('code'):
-            return HttpResponseRedirect(self.success_url)
-        return HttpResponseBadRequest('Wrong confirmation code')
+        else:
+            all_forms_are_valid = False
+        sms = SMSLog.objects.filter(seller=self.object)
+        if sms and not (sms_log := sms.get()).confirmed:
+            confirmation_form = CodeForm(self.request.POST)
+            forms_context['confirmation_form'] = confirmation_form
+            if confirmation_form.is_valid():
+                confirmation_code = confirmation_form.cleaned_data['code']
+                if confirmation_code == sms_log.code:
+                    sms_log.confirmed = True
+                    sms_log.save()
+                else:
+                    confirmation_form.add_error(
+                        field='confirmation_code',
+                        error=ValidationError(
+                            'Ошибочный код подтверждения: %(value)s',
+                            code='invalid',
+                            params={'value': confirmation_code},
+                        )
+                    )
+                    all_forms_are_valid = False
+            else:
+                all_forms_are_valid = False
+        if all_forms_are_valid:
+            return HttpResponseRedirect(self.get_success_url())
+        else:
+            self.render_to_response(self.get_context_data(
+                    form=form,
+                    user_form=user_form,
+                    **forms_context,
+                )
+            )
 
 
 class AdAdd(mixins.PermissionRequiredMixin,
