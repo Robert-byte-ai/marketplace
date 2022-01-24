@@ -1,10 +1,13 @@
 {% extends "main/base.html" %}
 
 {% block content %}
+{% load cache %}
+{% cache 500 sidebar %}
 <h1>{{ ad.name }}</h1>
 <p>Price: {{ ad.price }}</p>
     {% load thumbnail %}
     {% for picture in ad.pictures.all %}
         <img src="{{ picture.image.url }}">
     {% endfor %}
+{% endcache %}
 {% endblock %}
