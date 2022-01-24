@@ -1,3 +1,5 @@
+from django.core.mail import send_mail
+
 from board.celery import app
 
 
@@ -9,3 +11,13 @@ def supper_sum(x, y):
 @app.task
 def hello():
     return 'Hello, world'
+
+
+@app.task
+def ads_message(emails):
+    return send_mail(
+        'Notification',
+        'New ad',
+        'company@gmail.com',
+        emails
+    )

@@ -4,9 +4,12 @@ from django.urls import reverse_lazy
 from django.views import generic
 from constance import config
 from django.contrib.auth import mixins
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 import random
 
-from .models import Ad, Tag, Seller
+from .tasks import ads_message
+from .models import Ad, Tag, Seller, User, Subscription
 from board.settings import ADS_PER_PAGE
 from .forms import UserForm, ImageFormset
 
@@ -32,9 +35,14 @@ class AdList(generic.ListView):
     }
 
     def get_queryset(self):
-        return Ad.objects.filter(
-            tags__name=self.request.GET.get('tag')
-        ).order_by('pk')
+        tag = self.request.GET.get('tag')
+        if tag:
+            queryset = Ad.objects.filter(
+                tags__name=tag
+            ).order_by('pk')
+        else:
+            queryset = super().get_queryset()
+        return queryset
 
 
 class AdDetail(generic.DetailView):
@@ -74,7 +82,7 @@ class SellerUpdate(mixins.LoginRequiredMixin,
 
 class AdAdd(mixins.PermissionRequiredMixin,
             mixins.LoginRequiredMixin,
-            generic.CreateView,):
+            generic.CreateView, ):
     permission_required = 'main.add_ad'
     model = Ad
     fields = '__all__'
@@ -126,3 +134,12 @@ class AdEdit(mixins.LoginRequiredMixin,
             if formset.is_valid():
                 formset.save()
             return HttpResponseRedirect(self.success_url)
+
+
+@receiver(post_save, sender=Ad)
+def ads(instance, created, **kwargs):
+    if created:
+        ads_message.delay([
+            user.email for user in User.objects.all()
+            if Subscription.objects.filter(user=user).exists()
+        ])
