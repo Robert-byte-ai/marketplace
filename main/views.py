@@ -4,12 +4,9 @@ from django.urls import reverse_lazy
 from django.views import generic
 from constance import config
 from django.contrib.auth import mixins
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 import random
 
-from .tasks import ads_message
-from .models import Ad, Tag, Seller, User, Subscription
+from .models import Ad, Tag, Seller
 from board.settings import ADS_PER_PAGE
 from .forms import UserForm, ImageFormset
 
@@ -134,12 +131,3 @@ class AdEdit(mixins.LoginRequiredMixin,
             if formset.is_valid():
                 formset.save()
             return HttpResponseRedirect(self.success_url)
-
-
-@receiver(post_save, sender=Ad)
-def ads(instance, created, **kwargs):
-    if created:
-        ads_message.delay([
-            user.email for user in User.objects.all()
-            if Subscription.objects.filter(user=user).exists()
-        ])
