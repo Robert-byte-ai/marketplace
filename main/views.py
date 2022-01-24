@@ -1,9 +1,11 @@
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-from django.views import generic, View
+from django.views import generic
 from constance import config
 from django.contrib.auth import mixins
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 import random
 
 from .models import Ad, Tag, Seller, SMSLog
@@ -21,6 +23,7 @@ def index(request):
     return render(request, 'index.html', context)
 
 
+@method_decorator(cache_page(60 * 5), name='dispatch')
 class AdList(generic.ListView):
     queryset = Ad.objects.all().order_by('pk')
     paginate_by = ADS_PER_PAGE
@@ -72,28 +75,30 @@ class SellerUpdate(mixins.LoginRequiredMixin,
         )
         return context
 
+    def save_forms(self, user_form, form):
+        if user_form.is_valid() and form.is_valid():
+            return user_form.save(), form.save()
+
     def post(self, request, *args, **kwargs):
         phone = self.request.POST.get('phone')
         self.object = self.get_object()
         form = self.get_form()
         user_form = self.get_context_data()['user_form']
-        if self.object.phone != phone and form.is_valid():
-            form.save()
+        if self.object.phone == phone:
+            self.save_forms(user_form, form)
+            return HttpResponseRedirect(self.success_url)
+        elif self.object.phone != phone:
             send_confirmation_code.delay(
                 phone, self.request.user.username
             )
+            self.save_forms(user_form, form)
             return HttpResponseRedirect(self.message_url)
-        if user_form.is_valid():
-            user_form.save()
-            return HttpResponseRedirect(self.success_url)
 
 
-class VerifyCode(mixins.PermissionRequiredMixin,
-                 mixins.LoginRequiredMixin,
+class VerifyCode(mixins.LoginRequiredMixin,
                  generic.TemplateView):
     success_url = reverse_lazy('seller_update')
     template_name = 'verify_phone.html'
-    permission_required = 'main.seller_message'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
