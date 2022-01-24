@@ -10,7 +10,9 @@ from .models import (
     Ad,
     ArchiveAds,
     Picture,
-    Subscription)
+    Subscription,
+    SMSLog
+)
 
 
 class FlatPageAdminForm(forms.ModelForm):
@@ -60,5 +62,6 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Ad, AdAdmin)
 admin.site.register(ArchiveAds)
+admin.site.register(SMSLog)
 admin.site.register(Picture, PictureAdmin)
 admin.site.register(Subscription)
