@@ -23,7 +23,7 @@ class BaseModel(models.Model):
         verbose_name='Название'
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     class Meta:
@@ -82,7 +82,7 @@ class Seller(models.Model):
         verbose_name = 'Продавец'
         verbose_name_plural = 'Продавцы'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{}'.format(self.user)
 
 
@@ -130,6 +130,7 @@ class Tag(BaseModel):
     """
         Модель тега, наследуюется от базовой модели
     """
+
     class Meta:
         ordering = ('-pk',)
         verbose_name = 'тег'
@@ -199,6 +200,7 @@ class ManagerArchive(models.Manager):
     """
     Определение архивных моделей
     """
+
     def get_queryset(self):
         return super().get_queryset().filter(is_archive=True)
 
