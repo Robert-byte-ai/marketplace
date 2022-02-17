@@ -49,7 +49,8 @@ class Seller(models.Model):
         max_length=200,
         db_index=True,
         unique=True,
-        default=11111,
+        null=True,
+        blank=True,
         verbose_name='ИНН',
         validators=[check_inn],
     )
