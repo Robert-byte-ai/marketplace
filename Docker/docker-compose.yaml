@@ -5,11 +5,6 @@ services:
     command: redis-server --port 6379
     ports:
      - "6379:6379"
-    volumes:
-      - ./redis-data:/usr/local/etc/redis
-      - ./redis.conf:/var/lib/redis/redis.conf
-    environment:
-     - REDIS_REPLICATION_MODE=master
 
   db:
     image: postgres:13.0-alpine
