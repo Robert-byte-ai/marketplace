@@ -23,7 +23,7 @@ class BaseModel(models.Model):
         verbose_name='Название'
     )
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -82,7 +82,7 @@ class Seller(models.Model):
         verbose_name = 'Продавец'
         verbose_name_plural = 'Продавцы'
 
-    def __str__(self) -> str:
+    def __str__(self):
         return '{}'.format(self.user)
 
 
