@@ -1,17 +1,34 @@
 version: "3.2"
 services:
-
- redis:
+  redis:
     image: "redis:alpine"
-
     command: redis-server --port 6379
-
     ports:
      - "6379:6379"
-
     volumes:
       - ./redis-data:/usr/local/etc/redis
       - ./redis.conf:/var/lib/redis/redis.conf
-
     environment:
      - REDIS_REPLICATION_MODE=master
+
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - /var/lib/postgresql/data/
+    env_file:
+      - ../.env
+
+  web:
+    build: .
+    restart: always
+    volumes:
+      - ..:/code
+    command:  >
+      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - ../.env
