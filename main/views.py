@@ -8,7 +8,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 import random
 
-from .models import Ad, Tag, Seller, SMSLog
+from .models import Ad, Tag, Seller, SMSLog, Group
 from board.settings import ADS_PER_PAGE
 from .forms import UserForm, ImageFormset, CodeForm
 from .tasks import send_confirmation_code
@@ -116,10 +116,8 @@ class VerifyCode(mixins.LoginRequiredMixin,
         return HttpResponseBadRequest('Wrong confirmation code')
 
 
-class AdAdd(mixins.PermissionRequiredMixin,
-            mixins.LoginRequiredMixin,
+class AdAdd(mixins.LoginRequiredMixin,
             generic.CreateView, ):
-    permission_required = 'main.add_ad'
     model = Ad
     fields = '__all__'
     template_name = 'ad_add.html'
@@ -136,6 +134,8 @@ class AdAdd(mixins.PermissionRequiredMixin,
         return context
 
     def post(self, request, *args, **kwargs):
+        if 'banned_users' in [group.name for group in request.user.groups.all()]:
+            return HttpResponseBadRequest('You are banned')
         form = self.get_form()
         if form.is_valid():
             self.object = form.save()

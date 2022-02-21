@@ -43,7 +43,9 @@ class Seller(models.Model):
 
     avatar = models.ImageField(
         upload_to='images/avatars',
-        default=f'images/avatars/{user}default.jpg'
+        default=f'images/avatars/{user}default.jpg',
+        blank=True,
+        null=True
     )
 
     phone = models.CharField(

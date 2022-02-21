@@ -1,95 +1,100 @@
-from main.models import Tag, User, Seller, Category, Ad
+from django.test import TestCase, Client
+from django.urls import reverse
+import pytest
 
-tags_names = ['Другое', 'Искусство', 'Наука>', 'Ремонт', 'Автолюбителям', 'Кулинария', 'Красота', 'Хобби', 'Ретро']
-for tag in tags_names:
-    Tag.objects.create(name=tag)
+from .models import Category, User, Ad, Seller, Group
 
-Tag.objects.all()
-# <QuerySet [<Tag: Другое>, <Tag: Искусство>, <Tag: Наука>, <Tag: Ремонт>, <Tag: Автолюбителям>, <Tag: Кулинария>,
-# <Tag: Красота>, <Tag: Хобби>, <Tag: Ретро>]>
+HOME_URL = reverse('index')
 
-usernames = ['robert', 'Robert1', 'Robert2', 'Robert3']
+ADS_URL = reverse('ads')
 
-for username in usernames:
-    User.objects.create_user(username=username)
+USERNAME = 'Robert'
 
-User.objects.all()
-# <QuerySet [<User: robert>, <User: Robert1>, <User: Robert2>, <User: Robert3>]>
+SELLER_UPDATE_URL = reverse('seller_update')
 
-for user in User.objects.all():
-    Seller.objects.create(user=user)
+PHONE_CONFIRM_URL = reverse('seller_phone')
 
-Seller.objects.all()
-# <QuerySet [<Seller: Robert2>, <Seller: Robert1>, <Seller: robert>]>
-
-categoryies = ['Садоводство', 'Музыка', 'Одежда', 'Книги']
-
-for category in categoryies:
-    Category.objects.create(name=category)
-
-Category.objects.all()
-# <QuerySet [<Category: Садоводство>, <Category: Музыка>, <Category: Одежда>, <Category: Книги>]>
-
-Seller.objects.get(pk=1).ads.create(name='something', category=Category.objects.get(pk=1))
-# <Ad: something>
-
-Seller.objects.get(pk=1).ads.create(name='Товар 1', category=Category.objects.get(pk=2))
-# <Ad: Товар 1>
-
-Seller.objects.get(pk=1).ads.create(name='Товар 2', category=Category.objects.get(pk=3))
-# <Ad: Товар 2>
-
-Seller.objects.all()[0].ads.create(name='Что-нибудь', category=Category.objects.get(pk=3))
-# <Ad: Что-нибудь>
-
-Seller.objects.all()[0].ads.create(name='Что-нибудь 1', category=Category.objects.get(pk=4))
-# <Ad: Что-нибудь 1>
-
-Seller.objects.all()[0].ads.create(name='Что-нибудь 2', category=Category.objects.get(pk=1))
-# <Ad: Что-нибудь 2>
-
-Ad.objects.all()
-# <QuerySet [<Ad: Что-нибудь 2>, <Ad: Что-нибудь 1>, <Ad: Что-нибудь>, <Ad: Товар 2>, <Ad: Товар 1>, <Ad: something>]>
-
-Seller.objects.all()[1].ads.create(name='some else', category=Category.objects.get(pk=2))
-# <Ad: some else>
-
-Seller.objects.all()[1].ads.create(name='some else 1', category=Category.objects.get(pk=3))
-# <Ad: some else 1>
-
-Seller.objects.all()[1].ads.create(name='some else 2', category=Category.objects.get(pk=1))
-# <Ad: some else 2>
-
-Seller.objects.all()[1].ads.all()[1].tags.set(Tag.objects.all()[0:3])
-Seller.objects.all()[1].ads.all()[1].tags.all()
-# <QuerySet [<Tag: Другое>, <Tag: Искусство>, <Tag: Наука>]>
-
-Seller.objects.all()[0].ads.all()[0].tags.set(Tag.objects.all()[3:6])
-Seller.objects.all()[0].ads.all()[0].tags.all()
-# <QuerySet [<Tag: Ремонт>, <Tag: Автолюбителям>, <Tag: Кулинария>]>
-
-Seller.objects.all()[2].ads.all()[2].tags.set(Tag.objects.all()[6:9])
-Seller.objects.all()[2].ads.all()[2].tags.all()
-# <QuerySet [<Tag: Красота>, <Tag: Хобби>, <Tag: Ретро>]>
+AD_ADD_URL = reverse('ad_add')
 
 
-Ad.objects.filter(category__name='Садоводство')
-# <QuerySet [<Ad: Что-нибудь 1>]>
+class URLTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.group = Group.objects.create(name='common_users')
+        cls.user = User.objects.create_user(username=USERNAME)
+        cls.seller = Seller.objects.create(user=cls.user, avatar=None)
+        cls.category = Category.objects.create(name='Тестовая категория')
+        cls.ad = Ad.objects.create(
+            name='Текст',
+            category=cls.category,
+            seller=cls.seller
+        )
+        cls.AD_EDIT_URL = reverse('ad_edit', kwargs={
+            'pk': cls.ad.pk
+        })
+        cls.AD_URL = reverse('ad', kwargs={
+            'pk': cls.ad.pk
+        })
 
-Ad.objects.filter(category__name='Музыка')
-# <QuerySet [<Ad: some else 1>, <Ad: Что-нибудь>, <Ad: Товар 2>]>
+        cls.guest_client = Client()
+        cls.authorized_client = Client()
+        cls.authorized_client.force_login(cls.user)
 
-Ad.objects.filter(category__name='Одежда')
-# <QuerySet [<Ad: some else>, <Ad: Товар 1>]>
+    def test_url_status(self):
+        test_urls = [
+            [HOME_URL, self.guest_client, 200],
+            [ADS_URL, self.guest_client, 200],
+            [SELLER_UPDATE_URL, self.authorized_client, 200],
+            [PHONE_CONFIRM_URL, self.authorized_client, 200],
+            [AD_ADD_URL, self.authorized_client, 200],
+            [self.AD_EDIT_URL, self.authorized_client, 200],
+            [self.AD_URL, self.guest_client, 200],
+        ]
+        for url, client, status in test_urls:
+            with self.subTest(url=url, client=client):
+                self.assertEqual(client.get(url).status_code, status)
 
-Ad.objects.filter(category__name='Книги')
-# <QuerySet [<Ad: some else 2>, <Ad: Что-нибудь 2>, <Ad: something>]>
 
-from main.tasks import supper_sum, hello
+@pytest.fixture
+def setUp():
+    Group.objects.create(name='common_users')
+    user = User.objects.create_user(username=USERNAME)
+    seller = Seller.objects.create(user=user, avatar=None)
+    category = Category.objects.create(name='Тестовая категория')
+    ad = Ad.objects.create(
+        name='Текст',
+        category=category,
+        seller=seller
+    )
+    AD_EDIT_URL = reverse('ad_edit', kwargs={
+        'pk': ad.pk
+    })
+    AD_URL = reverse('ad', kwargs={
+        'pk': ad.pk
+    })
 
-task_sum = supper_sum.delay(5, 8)
-print(task_sum.result)
-# 13
-task_hello = hello.delay()
-print(task_hello.result)
-# Hello, world
+    guest_client = Client()
+    authorized_client = Client()
+    authorized_client.force_login(user)
+    return {
+        'AD_EDIT_URL': AD_EDIT_URL,
+        'AD_URL': AD_URL,
+        'guest_client': guest_client,
+        'authorized_client': authorized_client,
+    }
+
+
+@pytest.mark.django_db
+def test_url_status(setUp):
+    test_urls = [
+        [HOME_URL, setUp['guest_client'], 200],
+        [ADS_URL, setUp['guest_client'], 200],
+        [SELLER_UPDATE_URL, setUp['authorized_client'], 200],
+        [PHONE_CONFIRM_URL, setUp['authorized_client'], 200],
+        [AD_ADD_URL, setUp['authorized_client'], 200],
+        [setUp['AD_EDIT_URL'], setUp['authorized_client'], 200],
+        [setUp['AD_URL'], setUp['guest_client'], 200],
+    ]
+    for url, client, status in test_urls:
+        assert client.get(url).status_code == status
