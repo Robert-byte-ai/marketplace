@@ -4,7 +4,6 @@ import random
 from .models import (
     User,
     Seller,
-    Tag,
     Category,
     Ad
 )
@@ -34,18 +33,6 @@ class SellerFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Seller
         django_get_or_create = ('user',)
-
-
-class TagFactory(factory.django.DjangoModelFactory):
-    name = factory.Faker(
-        'sentence',
-        nb_words=5,
-        variable_nb_words=True
-    )
-
-    class Meta:
-        model = Tag
-        django_get_or_create = ('name',)
 
 
 class CategoryFactory(factory.django.DjangoModelFactory):

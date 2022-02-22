@@ -7,7 +7,7 @@ from constance import config
 from django.contrib.auth import mixins
 import random
 
-from .models import Ad, Tag, Seller, SMSLog, User
+from .models import Ad, Seller, SMSLog, User
 from board.settings import ADS_PER_PAGE
 from .forms import UserForm, ImageFormset, CodeForm, SellerForm
 from .tasks import send_confirmation_code
@@ -28,7 +28,6 @@ class AdList(generic.ListView):
     template_name = 'ad_list.html'
     context_object_name = 'ads_list'
     extra_context = {
-        'tags': Tag.objects.all(),
         'notifications': random.randint(0, 100),
         'hello': 'Привет, мир!'
     }

@@ -6,7 +6,6 @@ from django.contrib.flatpages.models import FlatPage
 from .models import (
     Seller,
     Category,
-    Tag,
     Ad,
     ArchiveAds,
     Picture,
@@ -65,7 +64,7 @@ admin.site.unregister(FlatPage)
 admin.site.register(FlatPage, FlatPageAdmin)
 admin.site.register(Seller, SellerAdmin)
 admin.site.register(Category, CategoryAdmin)
-admin.site.register(Tag, TagAdmin)
+# admin.site.register(Tag, TagAdmin)
 admin.site.register(Ad, AdAdmin)
 admin.site.register(ArchiveAds)
 admin.site.register(SMSLog)
