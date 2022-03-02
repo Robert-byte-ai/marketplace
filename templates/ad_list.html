@@ -24,5 +24,12 @@
             </tr>
         {% endfor %}
     </table>
+    <table>
+        <tr>
+            {% for tag in tags %}
+                <td><a href="?tag={{ tag }}">{{ tag }}</a></td>
+            {% endfor %}
+        </tr>
+    </table>
     {% include 'main/includes/paginator.html' %}
 {% endblock %}

@@ -180,6 +180,7 @@ class Ad(BaseModel):
         models.CharField(max_length=200),
         blank=True,
         verbose_name='Теги',
+        default=list
     )
 
     price = models.PositiveIntegerField(

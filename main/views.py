@@ -32,11 +32,23 @@ class AdList(generic.ListView):
         'hello': 'Привет, мир!'
     }
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['tags'] = set(
+            [
+                ' '.join(tag['tags'])
+                for tag
+                in Ad.objects.all().values('tags')
+            ]
+        )
+
+        return context
+
     def get_queryset(self):
         tag = self.request.GET.get('tag')
         if tag:
             queryset = Ad.objects.filter(
-                tags__name=tag
+                tags__contains=[tag]
             ).order_by('pk')
         else:
             queryset = super().get_queryset()
@@ -111,7 +123,8 @@ class SellerUpdateView(mixins.LoginRequiredMixin,
         if all_forms_are_valid:
             return HttpResponseRedirect(self.get_success_url())
         else:
-            self.render_to_response(self.get_context_data(
+            self.render_to_response(
+                self.get_context_data(
                     form=form,
                     user_form=user_form,
                     **forms_context,
