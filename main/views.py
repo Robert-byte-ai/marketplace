@@ -41,7 +41,6 @@ class AdList(generic.ListView):
                 in Ad.objects.all().values('tags')
             ]
         )
-
         return context
 
     def get_queryset(self):
