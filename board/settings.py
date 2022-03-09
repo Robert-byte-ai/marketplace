@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'sorl.thumbnail',
     'django_apscheduler',
     'django.contrib.postgres',
+    'django.contrib.sitemaps',
 ]
 
 MIDDLEWARE = [
