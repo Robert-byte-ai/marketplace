@@ -3,6 +3,7 @@ from django.contrib.auth.models import User, Group
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.postgres.fields import ArrayField
 
 from .utils import random_string_generator, check_inn
 
@@ -126,16 +127,15 @@ class Category(BaseModel):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
-
-class Tag(BaseModel):
+    # class Tag(BaseModel):
     """
         Модель тега, наследуюется от базовой модели
     """
 
-    class Meta:
-        ordering = ('-pk',)
-        verbose_name = 'тег'
-        verbose_name_plural = 'теги'
+    # class Meta:
+    # ordering = ('-pk',)
+    # verbose_name = 'тег'
+    # verbose_name_plural = 'теги'
 
 
 class Ad(BaseModel):
@@ -176,10 +176,11 @@ class Ad(BaseModel):
         verbose_name='Дата редактирования'
     )
 
-    tags = models.ManyToManyField(
-        Tag,
-        related_name='ads',
+    tags = ArrayField(
+        models.CharField(max_length=200),
+        blank=True,
         verbose_name='Теги',
+        default=list
     )
 
     price = models.PositiveIntegerField(

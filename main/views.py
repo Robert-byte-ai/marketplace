@@ -7,7 +7,7 @@ from constance import config
 from django.contrib.auth import mixins
 import random
 
-from .models import Ad, Tag, Seller, SMSLog, User
+from .models import Ad, Seller, SMSLog, User
 from board.settings import ADS_PER_PAGE
 from .forms import UserForm, ImageFormset, CodeForm, SellerForm
 from .tasks import send_confirmation_code
@@ -28,16 +28,26 @@ class AdList(generic.ListView):
     template_name = 'ad_list.html'
     context_object_name = 'ads_list'
     extra_context = {
-        'tags': Tag.objects.all(),
         'notifications': random.randint(0, 100),
         'hello': 'Привет, мир!'
     }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['tags'] = set(
+            [
+                ' '.join(tag['tags'])
+                for tag
+                in Ad.objects.all().values('tags')
+            ]
+        )
+        return context
 
     def get_queryset(self):
         tag = self.request.GET.get('tag')
         if tag:
             queryset = Ad.objects.filter(
-                tags__name=tag
+                tags__contains=[tag]
             ).order_by('pk')
         else:
             queryset = super().get_queryset()
@@ -112,7 +122,8 @@ class SellerUpdateView(mixins.LoginRequiredMixin,
         if all_forms_are_valid:
             return HttpResponseRedirect(self.get_success_url())
         else:
-            self.render_to_response(self.get_context_data(
+            self.render_to_response(
+                self.get_context_data(
                     form=form,
                     user_form=user_form,
                     **forms_context,
