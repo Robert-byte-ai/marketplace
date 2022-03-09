@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'sorl.thumbnail',
     'django_apscheduler',
+    'django.contrib.postgres',
 ]
 
 MIDDLEWARE = [
@@ -128,7 +129,6 @@ ADS_PER_PAGE = 10
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',

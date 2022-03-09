@@ -192,6 +192,12 @@ class Ad(BaseModel):
         default=False,
     )
 
+    text = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name='Текст'
+    )
+
     class Meta:
         ordering = ('-pk',)
         verbose_name = 'Объявление'
