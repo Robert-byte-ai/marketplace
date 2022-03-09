@@ -39,6 +39,10 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name',)
 
 
+def archive(modeladmin, request, queryset):
+    queryset.update(is_archive=True)
+
+
 class AdAdmin(admin.ModelAdmin):
     list_display = (
         'name',
@@ -49,6 +53,8 @@ class AdAdmin(admin.ModelAdmin):
         'price',
         'pk',
     )
+    list_filter = ('tags', 'pub_date')
+    actions = [archive]
 
 
 class PictureAdmin(admin.ModelAdmin):
