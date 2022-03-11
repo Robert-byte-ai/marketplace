@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from main.models import Ad
 from .pagination import AdsPagination
@@ -10,7 +10,7 @@ from .serializers import AdSerializer
 class AdViewSet(viewsets.ModelViewSet):
     serializer_class = AdSerializer
     pagination_class = AdsPagination
-    permission_classes = (IsAuthenticated, SellerOrReadOnly)
+    permission_classes = (IsAuthenticatedOrReadOnly, SellerOrReadOnly)
 
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user.seller)
