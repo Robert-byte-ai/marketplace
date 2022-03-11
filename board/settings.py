@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
     'rest_framework',
     'rest_framework.authtoken',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -193,7 +194,6 @@ LOGGING = {
         'level': 'WARNING',
     },
 }
-
 
 sentry_sdk.init(
     dsn=f"https://{os.getenv('SENTRY_KEY')}.ingest.sentry.io/6010061",
