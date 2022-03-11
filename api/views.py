@@ -1,15 +1,19 @@
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 
 from main.models import Ad
 from .pagination import AdsPagination
+from .permission import SellerOrReadOnly
 from .serializers import AdSerializer
 
 
 class AdViewSet(viewsets.ModelViewSet):
     serializer_class = AdSerializer
-    permission_classes = (AllowAny,)
     pagination_class = AdsPagination
+    permission_classes = (IsAuthenticated, SellerOrReadOnly)
+
+    def perform_create(self, serializer):
+        serializer.save(seller=self.request.user.seller)
 
     def get_queryset(self, ):
         queryset = Ad.objects.all()

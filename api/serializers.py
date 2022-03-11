@@ -10,6 +10,8 @@ class AdSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all()
     )
 
+    seller = serializers.StringRelatedField()
+
     class Meta:
         fields = (
             'seller',
