@@ -1,5 +1,6 @@
 import os
-
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -173,3 +174,27 @@ CACHES = {
         }
     }
 }
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'email_backend': 'django.core.mail.backends.filebased.EmailBackend',
+        }
+    },
+    'root': {
+        'handlers': ['mail_admins'],
+        'level': 'WARNING',
+    },
+}
+
+
+sentry_sdk.init(
+    dsn=f"https://{os.getenv('SENTRY_KEY')}.ingest.sentry.io/6010061",
+    integrations=[DjangoIntegration()],
+    traces_sample_rate=1.0,
+    send_default_pii=True,
+)
