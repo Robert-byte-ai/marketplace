@@ -7,11 +7,23 @@ from constance import config
 from django.contrib.auth import mixins
 from django.contrib.postgres.search import SearchVector
 import random
+from django.http import HttpResponse
+from django.views.decorators.http import require_GET
 
 from .models import Ad, Seller, SMSLog, User
 from board.settings import ADS_PER_PAGE
 from .forms import UserForm, ImageFormset, CodeForm, SellerForm
 from .tasks import send_confirmation_code
+
+
+@require_GET
+def robots_txt(request):
+    lines = [
+        "User-Agent: *",
+        "Disallow: /private/",
+        "Disallow: /junk/",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
 
 
 def index(request):
