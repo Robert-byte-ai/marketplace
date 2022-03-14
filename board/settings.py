@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django_apscheduler',
     'django.contrib.postgres',
     'django.contrib.sitemaps',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
