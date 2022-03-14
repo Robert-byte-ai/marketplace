@@ -5,6 +5,7 @@ from django.urls import reverse_lazy
 from django.views import generic, View
 from constance import config
 from django.contrib.auth import mixins
+from django.contrib.postgres.search import SearchVector
 import random
 
 from .models import Ad, Seller, SMSLog, User
@@ -45,10 +46,15 @@ class AdList(generic.ListView):
 
     def get_queryset(self):
         tag = self.request.GET.get('tag')
+        search_field = self.request.GET.get('search')
         if tag:
             queryset = Ad.objects.filter(
                 tags__contains=[tag]
             ).order_by('pk')
+        elif search_field:
+            queryset = Ad.objects.annotate(
+                search=SearchVector('name', 'text')
+            ).filter(search=search_field)
         else:
             queryset = super().get_queryset()
         return queryset
