@@ -1,3 +1,6 @@
 <div class="fixed-bottom">
     <p class="m-0 text-dark text-center ">&copy; Robert {% now "Y" %}</p>
+    {% if request.is_mobile %}
+        <p class="m-0 text-dark text-center "> It's mobile version</p>
+    {% endif %}
 </div>
