@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'django.contrib.sitemaps',
     'rest_framework',
+    'rest_framework.authtoken',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -193,10 +195,20 @@ LOGGING = {
     },
 }
 
-
 sentry_sdk.init(
     dsn=f"https://{os.getenv('SENTRY_KEY')}.ingest.sentry.io/6010061",
     integrations=[DjangoIntegration()],
     traces_sample_rate=1.0,
     send_default_pii=True,
 )
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
