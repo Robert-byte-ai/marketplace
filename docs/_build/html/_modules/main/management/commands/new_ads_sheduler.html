@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>main.management.commands.new_ads_sheduler &#8212; board 0.0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for main.management.commands.new_ads_sheduler</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">django.core.mail</span> <span class="kn">import</span> <span class="n">send_mail</span>
+<span class="kn">from</span> <span class="nn">django.core.management.base</span> <span class="kn">import</span> <span class="n">BaseCommand</span>
+<span class="kn">from</span> <span class="nn">apscheduler.schedulers.background</span> <span class="kn">import</span> <span class="n">BackgroundScheduler</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="kn">from</span> <span class="nn">main.models</span> <span class="kn">import</span> <span class="n">Ad</span><span class="p">,</span> <span class="n">Subscription</span><span class="p">,</span> <span class="n">User</span>
+
+
+<div class="viewcode-block" id="ads"><a class="viewcode-back" href="../../../../main.management.commands.html#main.management.commands.new_ads_sheduler.ads">[docs]</a><span class="k">def</span> <span class="nf">ads</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">Ad</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">latest</span><span class="p">(</span><span class="s1">&#39;pub_date&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">&gt;</span> <span class="p">(</span>
+            <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="n">send_mail</span><span class="p">(</span>
+            <span class="s1">&#39;Notification&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;New ads&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;company@gmail.com&#39;</span><span class="p">,</span>
+            <span class="p">[</span>
+                <span class="n">user</span><span class="o">.</span><span class="n">email</span> <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">Subscription</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+            <span class="p">]</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Command"><a class="viewcode-back" href="../../../../main.management.commands.html#main.management.commands.new_ads_sheduler.Command">[docs]</a><span class="k">class</span> <span class="nc">Command</span><span class="p">(</span><span class="n">BaseCommand</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Command.handle"><a class="viewcode-back" href="../../../../main.management.commands.html#main.management.commands.new_ads_sheduler.Command.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="n">scheduler</span> <span class="o">=</span> <span class="n">BackgroundScheduler</span><span class="p">(</span><span class="n">timezone</span><span class="o">=</span><span class="s1">&#39;Europe/Moscow&#39;</span><span class="p">)</span>
+        <span class="n">scheduler</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">ads</span><span class="p">,</span> <span class="n">trigger</span><span class="o">=</span><span class="s1">&#39;interval&#39;</span><span class="p">,</span> <span class="n">weeks</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">scheduler</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">board</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, robert.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

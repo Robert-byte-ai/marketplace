@@ -12,7 +12,6 @@ USERNAME = 'Robert'
 
 SELLER_UPDATE_URL = reverse('seller_update')
 
-PHONE_CONFIRM_URL = reverse('seller_phone')
 
 AD_ADD_URL = reverse('ad_add')
 
@@ -46,7 +45,6 @@ class URLTests(TestCase):
             [HOME_URL, self.guest_client, 200],
             [ADS_URL, self.guest_client, 200],
             [SELLER_UPDATE_URL, self.authorized_client, 200],
-            [PHONE_CONFIRM_URL, self.authorized_client, 200],
             [AD_ADD_URL, self.authorized_client, 200],
             [self.AD_EDIT_URL, self.authorized_client, 200],
             [self.AD_URL, self.guest_client, 200],
@@ -91,7 +89,6 @@ def test_url_status(setUp):
         [HOME_URL, setUp['guest_client'], 200],
         [ADS_URL, setUp['guest_client'], 200],
         [SELLER_UPDATE_URL, setUp['authorized_client'], 200],
-        [PHONE_CONFIRM_URL, setUp['authorized_client'], 200],
         [AD_ADD_URL, setUp['authorized_client'], 200],
         [setUp['AD_EDIT_URL'], setUp['authorized_client'], 200],
         [setUp['AD_URL'], setUp['guest_client'], 200],
