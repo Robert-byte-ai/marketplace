@@ -3,6 +3,7 @@ from django.contrib.auth.models import User, Group
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.postgres.fields import ArrayField
 
 from .utils import random_string_generator, check_inn
 
@@ -50,7 +51,8 @@ class Seller(models.Model):
         max_length=200,
         db_index=True,
         unique=True,
-        default=11111,
+        null=True,
+        blank=True,
         verbose_name='ИНН',
         validators=[check_inn],
     )
@@ -130,16 +132,16 @@ class Category(BaseModel):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
-
-class Tag(BaseModel):
+    # class Tag(BaseModel):
     """
         Модель тега, наследуюется от базовой модели,
         в подклассе Meta определены сортировка и перевод админки на русский
     """
-    class Meta:
-        ordering = ('-pk',)
-        verbose_name = 'тег'
-        verbose_name_plural = 'теги'
+
+    # class Meta:
+    # ordering = ('-pk',)
+    # verbose_name = 'тег'
+    # verbose_name_plural = 'теги'
 
 
 class Ad(BaseModel):
@@ -181,10 +183,11 @@ class Ad(BaseModel):
         verbose_name='Дата редактирования'
     )
 
-    tags = models.ManyToManyField(
-        Tag,
-        related_name='ads',
+    tags = ArrayField(
+        models.CharField(max_length=200),
+        blank=True,
         verbose_name='Теги',
+        default=list
     )
 
     price = models.PositiveIntegerField(
@@ -194,6 +197,12 @@ class Ad(BaseModel):
 
     is_archive = models.BooleanField(
         default=False,
+    )
+
+    text = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name='Текст'
     )
 
     class Meta:
@@ -206,6 +215,7 @@ class ManagerArchive(models.Manager):
     """
     Определение архивных моделей
     """
+
     def get_queryset(self):
         return super().get_queryset().filter(is_archive=True)
 

@@ -1,16 +1,29 @@
 from django.core.exceptions import ValidationError
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import generic, View
 from constance import config
 from django.contrib.auth import mixins
+from django.contrib.postgres.search import SearchVector
 import random
+from django.http import HttpResponse
+from django.views.decorators.http import require_GET
 
-from .models import Ad, Tag, Seller, SMSLog, User
+from .models import Ad, Seller, SMSLog, User
 from board.settings import ADS_PER_PAGE
 from .forms import UserForm, ImageFormset, CodeForm, SellerForm
 from .tasks import send_confirmation_code
+
+
+@require_GET
+def robots_txt(request):
+    lines = [
+        "User-Agent: *",
+        "Disallow: /private/",
+        "Disallow: /junk/",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
 
 
 def index(request):
@@ -28,17 +41,32 @@ class AdList(generic.ListView):
     template_name = 'ad_list.html'
     context_object_name = 'ads_list'
     extra_context = {
-        'tags': Tag.objects.all(),
         'notifications': random.randint(0, 100),
         'hello': 'Привет, мир!'
     }
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['tags'] = set(
+            [
+                ' '.join(tag['tags'])
+                for tag
+                in Ad.objects.all().values('tags')
+            ]
+        )
+        return context
+
     def get_queryset(self):
         tag = self.request.GET.get('tag')
+        search_field = self.request.GET.get('search')
         if tag:
             queryset = Ad.objects.filter(
-                tags__name=tag
+                tags__contains=[tag]
             ).order_by('pk')
+        elif search_field:
+            queryset = Ad.objects.annotate(
+                search=SearchVector('name', 'text')
+            ).filter(search=search_field)
         else:
             queryset = super().get_queryset()
         return queryset
@@ -112,7 +140,8 @@ class SellerUpdateView(mixins.LoginRequiredMixin,
         if all_forms_are_valid:
             return HttpResponseRedirect(self.get_success_url())
         else:
-            self.render_to_response(self.get_context_data(
+            self.render_to_response(
+                self.get_context_data(
                     form=form,
                     user_form=user_form,
                     **forms_context,

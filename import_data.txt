@@ -1,0 +1,4 @@
+python manage.py dumpdata --indent 2 > db.json
+python manage.py flush
+python manage.py loaddata 'db.json'
+Installed 173 object(s) from 1 fixture(s)

@@ -1,6 +1,10 @@
 {% extends "main/base.html" %}
 
 {% block content %}
+    <form action="" method="get">
+        <input name="search" placeholder="" type="search">
+        <button type="submit">Поиск</button>
+    </form>
     <table>
         <style>
             table {
@@ -27,7 +31,7 @@
     <table>
         <tr>
             {% for tag in tags %}
-                <td><a href="?tag={{ tag.name }}">{{ tag.name }}</a></td>
+                <td><a href="?tag={{ tag }}">{{ tag }}</a></td>
             {% endfor %}
         </tr>
     </table>
