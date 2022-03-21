@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
-from django.http import HttpResponseRedirect
+from django.db.models import QuerySet
+from django.http import HttpResponseRedirect, HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import generic, View
@@ -7,7 +8,6 @@ from constance import config
 from django.contrib.auth import mixins
 from django.contrib.postgres.search import SearchVector
 import random
-from django.http import HttpResponse
 from django.views.decorators.http import require_GET
 
 from .models import Ad, Seller, SMSLog, User
@@ -17,7 +17,7 @@ from .tasks import send_confirmation_code
 
 
 @require_GET
-def robots_txt(request):
+def robots_txt(request: HttpRequest) -> HttpResponse:
     lines = [
         "User-Agent: *",
         "Disallow: /private/",
@@ -26,7 +26,7 @@ def robots_txt(request):
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
 
-def index(request):
+def index(request: HttpRequest) -> HttpResponse:
     context = {
         "turn_on_block": config.MAINTENANCE_MODE,
         'notifications': random.randint(0, 100),
@@ -45,7 +45,7 @@ class AdList(generic.ListView):
         'hello': 'Привет, мир!'
     }
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data()
         context['tags'] = set(
             [
@@ -56,7 +56,7 @@ class AdList(generic.ListView):
         )
         return context
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         tag = self.request.GET.get('tag')
         search_field = self.request.GET.get('search')
         if tag:
@@ -85,11 +85,11 @@ class SellerUpdateView(mixins.LoginRequiredMixin,
     form_class = SellerForm
     success_url = reverse_lazy("seller_update")
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset: QuerySet = None) -> object:
         seller, created = Seller.objects.get_or_create(user=self.request.user)
         return seller
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: dict) -> dict:
         context = super().get_context_data(**kwargs)
         user = self.request.user
         if 'user_form' not in context:

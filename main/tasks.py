@@ -14,17 +14,17 @@ load_dotenv()
 
 
 @app.task
-def supper_sum(x, y):
+def supper_sum(x: int, y: int) -> int:
     return x + y
 
 
 @app.task
-def hello():
+def hello() -> str:
     return 'Hello, world'
 
 
 @app.task
-def ads_message():
+def ads_message() -> None:
     ads_for_week = Ad.objects.filter(
         pub_date__range=(
             (timezone.now() - timedelta(days=7)),
@@ -41,7 +41,7 @@ def ads_message():
     return send_message('There are no ads', emails)
 
 
-def send_message(message, emails):
+def send_message(message: str, emails: list) -> None:
     send_mail(
         'Notification',
         message,
@@ -51,7 +51,7 @@ def send_message(message, emails):
 
 
 @app.task
-def send_confirmation_code(phone, seller_username):
+def send_confirmation_code(phone: int, seller_username: str) -> str:
     account_sid = os.getenv('TWILIO_ACCOUNT_SID')
     auth_token = os.getenv('TWILIO_AUTH_TOKEN')
     client = Client(account_sid, auth_token)

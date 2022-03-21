@@ -1,10 +1,23 @@
 {% extends "main/base.html" %}
 
 {% block content %}
-<h1>{{ ad.name }}</h1>
-<p>Price: {{ new_price }}</p>
-    {% load thumbnail %}
-    {% for picture in ad.pictures.all %}
-        <img src="{{ picture.image.url }}">
-    {% endfor %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Ad",
+      "name": "{{ ad.name }}",
+      "author": {
+        "@type": "Person",
+        "name": "{{ ad.seller.user.username }}"
+      },
+      "datePublished": "{{ ad.pub_date }}",
+      "description": "{{ ad.text }}",
+    }
+    </script>
+    <h1>{{ ad.name }}</h1>
+    <p>Price: {{ new_price }}</p>
+        {% load thumbnail %}
+        {% for picture in ad.pictures.all %}
+            <img src="{{ picture.image.url }}">
+        {% endfor %}
 {% endblock %}

@@ -4,12 +4,13 @@ from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
+from django.db.models.query import QuerySet
 
 from .utils import random_string_generator, check_inn
 
 
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
+def create_user_profile(sender, instance, created, **kwargs) -> None:
     if created:
         instance.groups.add(Group.objects.get(name='common_users'))
 
@@ -24,7 +25,7 @@ class BaseModel(models.Model):
         verbose_name='Название'
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     class Meta:
@@ -74,7 +75,7 @@ class Seller(models.Model):
     )
 
     @property
-    def count_ads(self):
+    def count_ads(self) -> int:
         count = Ad.objects.filter(seller__user=self.user).count()
         if count:
             return count
@@ -85,7 +86,7 @@ class Seller(models.Model):
         verbose_name = 'Продавец'
         verbose_name_plural = 'Продавцы'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{}'.format(self.user)
 
 
@@ -106,7 +107,7 @@ class Category(BaseModel):
         db_index=True
     )
 
-    def unique_slug_generator(self, instance, new_slug=None):
+    def unique_slug_generator(self, instance, new_slug=None) -> str:
         if new_slug is not None:
             slug = new_slug
         else:
@@ -122,7 +123,7 @@ class Category(BaseModel):
             return self.unique_slug_generator(instance, new_slug=new_slug)
         return slug
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         if not self.slug:
             self.slug = self.unique_slug_generator(self)
         super(Category, self).save(*args, **kwargs)
@@ -216,7 +217,7 @@ class ManagerArchive(models.Manager):
     Определение архивных моделей
     """
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         return super().get_queryset().filter(is_archive=True)
 
 
