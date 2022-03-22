@@ -6,3 +6,5 @@ static
 .env
 migrations
 media
+security.md
+import_data.txt
