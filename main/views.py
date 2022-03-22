@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.views import generic, View
 from constance import config
 from django.contrib.auth import mixins
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import SearchVector, SearchQuery
 import random
 from django.views.decorators.http import require_GET
 
@@ -57,16 +57,14 @@ class AdList(generic.ListView):
         return context
 
     def get_queryset(self) -> QuerySet:
-        tag = self.request.GET.get('tag')
-        search_field = self.request.GET.get('search')
-        if tag:
+        if tag := self.request.GET.get('tag'):
             queryset = Ad.objects.filter(
                 tags__contains=[tag]
             ).order_by('pk')
-        elif search_field:
+        elif search_field := self.request.GET.get('search'):
             queryset = Ad.objects.annotate(
                 search=SearchVector('name', 'text')
-            ).filter(search=search_field)
+            ).filter(search=SearchQuery(search_field))
         else:
             queryset = super().get_queryset()
         return queryset
@@ -176,6 +174,7 @@ class AdAdd(mixins.PermissionRequiredMixin,
             if formset.is_valid():
                 formset.save()
             return HttpResponseRedirect(self.success_url)
+        return form.invalid()
 
 
 class AdEdit(mixins.LoginRequiredMixin,
@@ -204,3 +203,4 @@ class AdEdit(mixins.LoginRequiredMixin,
             if formset.is_valid():
                 formset.save()
             return HttpResponseRedirect(self.success_url)
+        return form.invalid()
