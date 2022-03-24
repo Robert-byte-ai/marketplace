@@ -13,10 +13,6 @@ services:
     env_file:
       - ../.env
 
-
-    environment:
-     - REDIS_REPLICATION_MODE=master
-
   web:
     build: .
     restart: always
